@@ -1,8 +1,8 @@
-const { Users, Comments, Topics, Articles } = require('../models/models');
+const { Users, Comments, Topics, Articles } = require('../models');
 
 const savedData = {};
 
-function saveUser () {
+function saveUser() {
   const user = new Users({
     username: 'northcoder',
     name: 'Awesome Northcoder',
@@ -30,15 +30,23 @@ function saveArticles() {
 
 function saveComments(articles) {
   const comments = [
-    { body: 'this is a comment', belongs_to: articles[0]._id, created_by: 'northcoder' },
-    { body: 'this is another comment', belongs_to: articles[0]._id, created_by: 'northcoder' }
+    {
+      body: 'this is a comment',
+      belongs_to: articles[0]._id,
+      created_by: 'northcoder'
+    },
+    {
+      body: 'this is another comment',
+      belongs_to: articles[0]._id,
+      created_by: 'northcoder'
+    }
   ].map(c => new Comments(c).save());
   return Promise.all(comments);
 }
 
 function saveTestData() {
   return saveUser()
-    .then((user) => {
+    .then(user => {
       savedData.user = user;
       return saveTopics();
     })
@@ -50,7 +58,7 @@ function saveTestData() {
       savedData.articles = articles;
       return saveComments(articles);
     })
-    .then((comments) => {
+    .then(comments => {
       savedData.comments = comments;
       return savedData;
     });
