@@ -21,7 +21,7 @@ const CommentSchema = new Schema({
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'articles',
+    ref: 'users',
     required: true
   }
 });

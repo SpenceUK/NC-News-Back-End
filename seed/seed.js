@@ -92,7 +92,14 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
       console.log(
         `💾 - ${articleDocs.length} new documents saved in collection Articles.`
       );
-
+      console.log(faker.fake("I think {{company.catchphrase}}, {{company.bs}}, {{bsBuzz}}, I {{hacker.verb}} {{hacker.noun}} this!"))
+  //     return new models.Comments({
+  //       body: string,
+  // belongs_to: random articleId,
+  // created_at: epoch time,
+  // votes: random number,
+  // created_by: random userId
+  //     }).save();
     }).then()
       return mongoose.disconnect();
     })
