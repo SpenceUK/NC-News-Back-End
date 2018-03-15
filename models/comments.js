@@ -8,6 +8,7 @@ const CommentSchema = new Schema({
   },
   belongs_to: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'articles',
     required: true
   },
   created_at: {
@@ -19,9 +20,9 @@ const CommentSchema = new Schema({
     default: 0
   },
   created_by: {
-    type: String,
-    required: true,
-    default: 'northcoder'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'articles',
+    required: true
   }
 });
 
