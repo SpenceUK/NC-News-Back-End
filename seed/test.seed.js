@@ -1,67 +1,108 @@
 const { Users, Comments, Topics, Articles } = require('../models');
+const mongoose = require('mongoose');
+const config = require('../config');
+mongoose.Promise = Promise;
 
-const savedData = {};
+function seedTopics(model, name, num) {
+  const docPromises = [];
+  for (let i = num; i > 0; i--) {
+    docPromises.push(
+      new model({
+        title: `TEST_${name.toUpperCase()}_${i}`,
+        slug: `test_${name.toLowerCase()}_${i}`
+      }).save()
+    );
+  }
+  return Promise.all(docPromises);
+}
 
-function saveUser() {
-  const user = new Users({
-    username: 'northcoder',
-    name: 'Awesome Northcoder',
-    avatar_url: 'https://avatars3.githubusercontent.com/u/6791502?v=3&s=200'
+function seedUsers(model, name, num) {
+  const docPromises = [];
+  for (let i = num; i > 0; i--) {
+    docPromises.push(
+      new model({
+        username: `TEST_${name.toUpperCase()}_${i}`,
+        name: `test_${name.toLowerCase()}_${i}`,
+        avatar_url: `TEST_${name.toLowerCase()}_URL_${i}`
+      }).save()
+    );
+  }
+  return Promise.all(docPromises);
+}
+
+function seedArticles(model, name, topicIds, userIds) {
+  const topicKeys = Object.keys(topicIds);
+  const userKeys = Object.keys(userIds);
+  const docPromises = topicKeys.map((key, i) => {
+    return new model({
+      title: `TEST_${name.toUpperCase()}_${i + 1}`,
+      body: `test_${name.toLowerCase()}_${i + 1}_article_content`,
+      belongs_to: topicIds[topicKeys[i]],
+      created_by: userIds[userKeys[i]]
+    }).save();
   });
-  return user.save();
+  return Promise.all(docPromises);
 }
 
-function saveTopics() {
-  const topics = [
-    { title: 'Football', slug: 'football' },
-    { title: 'Cooking', slug: 'cooking' },
-    { title: 'Cats', slug: 'cats' }
-  ].map(t => new Topics(t).save());
-  return Promise.all(topics);
+function seedComments(model, name, userIds, articleIds) {
+  const articleKeys = Object.keys(articleIds);
+  const userKeys = Object.keys(userIds);
+  const docPromises = [...articleKeys, ...userKeys].map((key, i) => {
+    return new model({
+      body: `TEST_${name.toUpperCase()}_${i + 1}`,
+      belongs_to: articleIds[articleKeys[`${i > 1 ? i - 2 : i}`]],
+      created_by: userIds[userKeys[`${i > 1 ? i - 2 : i}`]]
+    }).save();
+  });
+  return Promise.all(docPromises);
 }
 
-function saveArticles() {
-  const articles = [
-    { title: 'Cats are great', body: 'something', belongs_to: 'cats' },
-    { title: 'Football is fun', body: 'something', belongs_to: 'football' }
-  ].map(a => new Articles(a).save());
-  return Promise.all(articles);
-}
+function seedTestDb(DB_URL) {
+  const topicIds = {};
+  const userIds = {};
+  const articleIds = {};
 
-function saveComments(articles) {
-  const comments = [
-    {
-      body: 'this is a comment',
-      belongs_to: articles[0]._id,
-      created_by: 'northcoder'
-    },
-    {
-      body: 'this is another comment',
-      belongs_to: articles[0]._id,
-      created_by: 'northcoder'
-    }
-  ].map(c => new Comments(c).save());
-  return Promise.all(comments);
-}
-
-function saveTestData() {
-  return saveUser()
-    .then(user => {
-      savedData.user = user;
-      return saveTopics();
+  mongoose
+    .connect(DB_URL, { useMongoClient: true })
+    .then(() => {
+      return mongoose.connection.db.dropDatabase();
     })
-    .then(topics => {
-      savedData.topics = topics;
-      return saveArticles();
+    .then(() => {
+      return seedTopics(Topics, 'topic', 2);
     })
-    .then(articles => {
-      savedData.articles = articles;
-      return saveComments(articles);
+    .then(topicDocs => {
+      topicDocs.forEach(doc => {
+        topicIds[doc.title] = doc._id;
+      });
     })
-    .then(comments => {
-      savedData.comments = comments;
-      return savedData;
+    .then(() => {
+      return seedUsers(Users, 'user', 2);
+    })
+    .then(userDocs => {
+      userDocs.forEach(doc => {
+        userIds[doc.username] = doc._id;
+      });
+    })
+    .then(() => {
+      return seedArticles(Articles, 'article', topicIds, userIds);
+    })
+    .then(articleDocs => {
+      articleDocs.forEach(doc => {
+        articleIds[doc.title] = doc._id;
+      });
+    })
+    .then(() => {
+      return seedComments(Comments, 'comment', userIds, articleIds);
+    })
+    .then(() => {
+      return mongoose.disconnect();
+    })
+    .catch(err => {
+      console.log(`Test database seeding ERROR: \n${err}`);
+      return mongoose.disconnect();
     });
 }
 
-module.exports = saveTestData;
+seedTestDb(config.DB.test);
+
+module.exports = seedTestDb;

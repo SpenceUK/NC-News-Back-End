@@ -24,7 +24,10 @@ function parseCSVFile(pathToFile, arrayOfIdsObjects = []) {
         arrayOfJSONObjects.push(jsonObject);
       })
       .on('done', err => {
-        if (err) throw new Error(`CSV PARSE ERROR:\n${err}`);
+        if (err) {
+          throw new Error(`CSV PARSE ERROR:\n${err}`);
+          return mongoose.disconnect();
+        }
         console.log(`📄 - ${path.basename(pathToFile)} successfully parsed.`);
         res(arrayOfJSONObjects);
       });
@@ -126,6 +129,8 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
     })
     .catch(err => {
       console.log(`DATABASE SEEDING ERROR\n${err}`);
+      return mongoose.disconnect();
     });
 }
+
 seedDatabase(config.DB.dev, articlePath, topicsPath, usersPath, models);
