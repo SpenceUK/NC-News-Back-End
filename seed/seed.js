@@ -4,9 +4,7 @@ const csv = require('csvtojson');
 const path = require('path');
 const config = require('../config');
 const faker = require('faker');
-
-// This should seed your development database using the CSV file data
-// Feel free to use the async library, or native Promises, to handle the asynchronicity of the seeding operations.
+mongoose.Promise = Promise;
 
 const articlePath = path.join(__dirname + '/data/articles.csv');
 const topicsPath = path.join(__dirname + '/data/topics.csv');
@@ -26,7 +24,7 @@ function parseCSVFile(pathToFile, arrayOfIdsObjects = []) {
         arrayOfJSONObjects.push(jsonObject);
       })
       .on('done', err => {
-        if (err) throw new Error(`➡️ CSV PARSE ERROR: \n${err}`);
+        if (err) throw new Error(`CSV PARSE ERROR:\n${err}`);
         console.log(`📄 - ${path.basename(pathToFile)} successfully parsed.`);
         res(arrayOfJSONObjects);
       });
@@ -54,7 +52,6 @@ function saveInMongo(filePath, model, arrayOfIdsObjects) {
     })
     .then(objectDocsArray => {
       return Promise.all([objectDocsArray, ids]);
-      //return model.insertMany(parsedObjects);
     });
 }
 
@@ -64,7 +61,7 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
   let articleIds;
 
   mongoose
-    .connect(DB_URL)
+    .connect(DB_URL, { useMongoClient: true })
     .then(() => {
       console.log(`☎️ - connected to: ${DB_URL}`);
       return mongoose.connection.db.dropDatabase();
@@ -92,22 +89,43 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
       console.log(
         `💾 - ${articleDocs.length} new documents saved in collection Articles.`
       );
-      console.log(faker.fake("I think {{company.catchphrase}}, {{company.bs}}, {{bsBuzz}}, I {{hacker.verb}} {{hacker.noun}} this!"))
-  //     return new models.Comments({
-  //       body: string,
-  // belongs_to: random articleId,
-  // created_at: epoch time,
-  // votes: random number,
-  // created_by: random userId
-  //     }).save();
-    }).then()
+      const commentPromises = [];
+      Object.keys(articleIds).forEach(article => {
+        for (let i = Math.random() * 15 + 6; i > 0; i--) {
+          commentPromises.push(
+            new models.Comments({
+              body: faker.fake(
+                'Who ever has written this is a {{random.word}}, I really {{hacker.verb}} with this article! I think they should {{hacker.verb}} {{random.word}}. Why do they think {{random.word}} is a good idea? what a total {{random.word}}!'
+              ),
+              belongs_to: articleIds[randomProp(articleIds)],
+              created_at: new Date(
+                (Math.random() * 18 + 2000) << 0,
+                (Math.random() * 11) << 0,
+                (Math.random() * 31) << 0,
+                (Math.random() * 24) << 0,
+                (Math.random() * 60) << 0,
+                (Math.random() * 60) << 0
+              ),
+              votes: (Math.random() * 50) << 0,
+              created_by: userIds[randomProp(userIds)]
+            }).save()
+          );
+        }
+      });
+      return Promise.all(commentPromises);
+    })
+    .then(commentDocs => {
+      console.log(`📝 - ${commentDocs.length} new comments created.`);
+      console.log(
+        `💾 - ${commentDocs.length} new documents saved in collection Comments.`
+      );
       return mongoose.disconnect();
     })
     .then(() => {
       console.log(`☎️ - Disconnected from: ${DB_URL}.`);
     })
     .catch(err => {
-      console.log(`⚠️ DATABASE SEEDING ERROR ⚠️ \n${err}`);
+      console.log(`DATABASE SEEDING ERROR\n${err}`);
     });
 }
 seedDatabase(config.DB.dev, articlePath, topicsPath, usersPath, models);

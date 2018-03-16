@@ -12,8 +12,8 @@ const CommentSchema = new Schema({
     required: true
   },
   created_at: {
-    type: Number,
-    default: new Date().getTime()
+    type: Date,
+    default: new Date()
   },
   votes: {
     type: Number,
