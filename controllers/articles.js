@@ -60,7 +60,6 @@ function postNewCommentByArticleId(req, res, next) {
     .catch(err => {
       if (err.name === 'CastError')
         return next({ code: 1, msg: 'Article or User does not exist' });
-      console.log(err);
       next(err);
     });
 }
