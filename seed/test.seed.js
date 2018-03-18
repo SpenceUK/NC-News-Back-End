@@ -18,12 +18,12 @@ function seedTopics(model, name, num) {
 
 function seedUsers(model, name, num) {
   const docPromises = [];
-  for (let i = num; i > 0; i--) {
+  for (let i = 0; i < num; i++) {
     docPromises.push(
       new model({
-        username: `TEST_${name.toUpperCase()}_${i}`,
-        name: `test_${name.toLowerCase()}_${i}`,
-        avatar_url: `TEST_${name.toLowerCase()}_URL_${i}`
+        username: `test_${name.toLowerCase()}_${i + 1}`,
+        name: `TEST_${name.toUpperCase()}_${i + 1}`,
+        avatar_url: `TEST_${name.toLowerCase()}_URL_${i + 1}`
       }).save()
     );
   }
@@ -50,8 +50,8 @@ function seedComments(model, name, userIds, articleIds) {
   const docPromises = [...articleKeys, ...userKeys].map((key, i) => {
     return new model({
       body: `TEST_${name.toUpperCase()}_${i + 1}`,
-      belongs_to: articleIds[articleKeys[`${i > 1 ? i - 2 : i}`]],
-      created_by: userIds[userKeys[`${i > 1 ? i - 2 : i}`]]
+      belongs_to: articleIds[articleKeys[`${i % 2}`]],
+      created_by: userIds[userKeys[`${i % 2}`]]
     }).save();
   });
   return Promise.all(docPromises);
@@ -61,16 +61,13 @@ function seedTestDb(DB_URL) {
   const topicIds = {};
   const userIds = {};
   const articleIds = {};
+  const data = {};
 
-  mongoose
-    .connect(DB_URL, { useMongoClient: true })
-    .then(() => {
-      return mongoose.connection.db.dropDatabase();
-    })
-    .then(() => {
-      return seedTopics(Topics, 'topic', 2);
-    })
+  return seedTopics(Topics, 'topic', 2)
     .then(topicDocs => {
+      data.topics = topicDocs.map(doc =>
+        JSON.parse(JSON.stringify(doc.toObject()))
+      );
       topicDocs.forEach(doc => {
         topicIds[doc.title] = doc._id;
       });
@@ -79,6 +76,9 @@ function seedTestDb(DB_URL) {
       return seedUsers(Users, 'user', 2);
     })
     .then(userDocs => {
+      data.users = userDocs.map(doc =>
+        JSON.parse(JSON.stringify(doc.toObject()))
+      );
       userDocs.forEach(doc => {
         userIds[doc.username] = doc._id;
       });
@@ -87,6 +87,9 @@ function seedTestDb(DB_URL) {
       return seedArticles(Articles, 'article', topicIds, userIds);
     })
     .then(articleDocs => {
+      data.articles = articleDocs.map(doc =>
+        JSON.parse(JSON.stringify(doc.toObject()))
+      );
       articleDocs.forEach(doc => {
         articleIds[doc.title] = doc._id;
       });
@@ -94,12 +97,13 @@ function seedTestDb(DB_URL) {
     .then(() => {
       return seedComments(Comments, 'comment', userIds, articleIds);
     })
-    .then(() => {
-      return mongoose.disconnect();
+    .then(commentDocs => {
+      data.comments = commentDocs.map(doc =>
+        JSON.parse(JSON.stringify(doc.toObject()))
+      );
     })
-    .catch(err => {
-      console.log(`Test database seeding ERROR: \n${err}`);
-      return mongoose.disconnect();
+    .then(() => {
+      return Promise.all([data]);
     });
 }
 

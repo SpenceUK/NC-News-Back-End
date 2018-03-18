@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha spec",
     "start": "node listen.js",
-    "dev": "nodemon listen.js"
+    "dev": "nodemon listen.js",
+    "dev:test": "NODE_ENV='test'&& nodemon listen.js"
   },
   "author": "Chris Spence",
   "license": "ISC",
@@ -22,6 +23,7 @@
     "faker": "^4.1.0",
     "mocha": "^5.0.4",
     "morgan": "^1.9.0",
+    "nodemon": "^1.17.2",
     "supertest": "^3.0.0"
   }
 }
