@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 
 describe('Northcoders News API Tests\n', () => {
   let testData;
+
   beforeEach(() => {
     return mongoose.connection
       .dropDatabase()
@@ -18,6 +19,7 @@ describe('Northcoders News API Tests\n', () => {
         testData = data[0];
       });
   });
+
   after(() => {
     return mongoose.connection.db
       .dropDatabase()
@@ -28,6 +30,7 @@ describe('Northcoders News API Tests\n', () => {
         console.log(`Test database seeding ERROR: \n${err}`);
       });
   });
+
   describe('/api', () => {
     it('Get, Status 200, getReadMe()', () => {
       return request
@@ -35,6 +38,7 @@ describe('Northcoders News API Tests\n', () => {
         .expect(200)
         .then(() => {});
     });
+
     describe('/topics', () => {
       it('GET, status 200, getAllTopics()', () => {
         return request
@@ -57,6 +61,7 @@ describe('Northcoders News API Tests\n', () => {
         });
       });
     });
+
     describe('/articles', () => {
       it('GET, status 200, getAllArticles()', () => {
         return request
@@ -68,6 +73,17 @@ describe('Northcoders News API Tests\n', () => {
           });
       });
       describe('/:article_id', () => {
+        it('GET, status 200, getArticleById()', () => {
+          return request
+            .get(`/api/articles/${testData.articles[1]._id}`)
+            .expect(200)
+            .then(res => {
+              expect(res.body.article).to.be.an('object');
+              expect(res.body.article.title).to.equal(
+                testData.articles[1].title
+              );
+            });
+        });
         it('PUT, status 204, putArticleVoteUpOrDown() - increment', () => {
           return request
             .put(`/api/articles/${testData.articles[0]._id}?vote=up`)
@@ -96,17 +112,18 @@ describe('Northcoders News API Tests\n', () => {
             .get(`/api/articles/${testData.articles[0]._id}/comments`)
             .expect(200)
             .then(res => {
+              const sortedResult = res.body.article.comments.sort();
               expect(res.body.article).to.be.an('object');
-              expect(res.body.article.comments).to.eql(comments);
+              expect(res.body.article.comments).to.eql(comments.sort());
             });
         });
         it('POST, status 201, postNewCommentByArticleId()', () => {
           const newCommentBody = {
-            comment: 'new comment',
-            created_by: testData.users[0]._id
+            comment: 'new test comment',
+            created_by: testData.users[1]._id
           };
           return request
-            .post(`/api/articles/${testData.articles[0]._id}/comments`)
+            .post(`/api/articles/${testData.articles[1]._id}/comments`)
             .send(newCommentBody)
             .expect(201)
             .then(res => {
@@ -116,6 +133,7 @@ describe('Northcoders News API Tests\n', () => {
         });
       });
     });
+
     describe('/comments', () => {
       describe('/:comment_id', () => {
         it('GET, status 200, getCommentById()', () => {
@@ -161,6 +179,7 @@ describe('Northcoders News API Tests\n', () => {
         });
       });
     });
+
     describe('/users', () => {
       describe('/:user_name', () => {
         it('GET, status 200, getUserByUserName()', () => {
@@ -174,5 +193,5 @@ describe('Northcoders News API Tests\n', () => {
         });
       });
     });
-  }); // api
+  });
 });

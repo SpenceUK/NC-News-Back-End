@@ -10,6 +10,32 @@ function getAllArticles(req, res, next) {
     .catch(next);
 }
 
+function getArticleById(req, res, next) {
+  const { article_id } = req.params;
+  Articles.findOne({ _id: article_id })
+    .then(article => {
+      if (!article) {
+        const error = new Error('Article does not Exist');
+        error.name = 'Find Error';
+        throw error;
+      }
+      res.status(200).send({ article });
+    })
+    .catch(err => {
+      if (err.name === 'Find Error')
+        return next({
+          code: 1,
+          msg: err.message
+        });
+      if (err.name === 'CastError')
+        return next({
+          code: 1,
+          msg: 'Incorrect article id'
+        });
+      next(err);
+    });
+}
+
 function getCommentsByArticleId(req, res, next) {
   const { article_id } = req.params;
   return new Promise((res, rej) => {
@@ -83,6 +109,7 @@ function putArticleVoteUpOrDown(req, res, next) {
 
 module.exports = {
   getAllArticles,
+  getArticleById,
   getCommentsByArticleId,
   postNewCommentByArticleId,
   putArticleVoteUpOrDown
