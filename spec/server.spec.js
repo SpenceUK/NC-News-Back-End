@@ -32,15 +32,18 @@ describe('Northcoders News API Tests\n', () => {
   });
 
   describe('/api', () => {
-    it('Get, Status 200, getReadMe()', () => {
+    it('Get, Status 200', () => {
       return request
         .get('/api')
         .expect(200)
         .then(() => {});
     });
+    it('Page not found, 404', () => {
+      return request.get('/ap').expect(404);
+    });
 
     describe('/topics', () => {
-      it('GET, status 200, getAllTopics()', () => {
+      it('GET, status 200', () => {
         return request
           .get('/api/topics/')
           .expect(200)
@@ -50,7 +53,7 @@ describe('Northcoders News API Tests\n', () => {
           });
       });
       describe('/:topic_id/articles', () => {
-        it('GET, status 200, getAllArticlesByTopic()', () => {
+        it('GET, status 200', () => {
           return request
             .get(`/api/topics/${testData.topics[0]._id}/articles`)
             .expect(200)
@@ -59,21 +62,29 @@ describe('Northcoders News API Tests\n', () => {
               expect(res.body.articles[0]).to.eql(testData.articles[0]);
             });
         });
+        it('Bad Request 400', () => {
+          return request
+            .get(`/api/topics/123456789/articles`)
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.be.an('object');
+            });
+        });
       });
     });
 
     describe('/articles', () => {
-      it('GET, status 200, getAllArticles()', () => {
+      it('GET, status 200', () => {
         return request
           .get('/api/articles')
           .expect(200)
           .then(res => {
             expect(res.body.articles).to.be.an('array');
-            expect(res.body.articles).to.eql(testData.articles);
+            expect(res.body.articles).to.eql(testData.articles.sort());
           });
       });
       describe('/:article_id', () => {
-        it('GET, status 200, getArticleById()', () => {
+        it('GET, status 200', () => {
           return request
             .get(`/api/articles/${testData.articles[1]._id}`)
             .expect(200)
@@ -84,7 +95,15 @@ describe('Northcoders News API Tests\n', () => {
               );
             });
         });
-        it('PUT, status 204, putArticleVoteUpOrDown() - increment', () => {
+        it('Bad Request 400', () => {
+          return request
+            .get(`/api/articles/123456789`)
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.be.an('object');
+            });
+        });
+        it('PUT, status 204, increment', () => {
           return request
             .put(`/api/articles/${testData.articles[0]._id}?vote=up`)
             .expect(204)
@@ -94,30 +113,37 @@ describe('Northcoders News API Tests\n', () => {
               });
             });
         });
-        it('PUT, status 204, putArticleVoteUpOrDown() - decrement', () => {
+        it('PUT, status 204, decrement', () => {
           return request
             .put(`/api/articles/${testData.articles[0]._id}?vote=down`)
             .expect(204)
             .then(() => {
-              request.get('/api/articles').then(res => {
+              return request.get('/api/articles').then(res => {
                 expect(res.body.articles[0].votes).to.equal(-1);
               });
             });
         });
+        it('Bad Request 400', () => {
+          return request
+            .get(`/api/articles/123456789?vote=up`)
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.be.an('object');
+            });
+        });
       });
+
       describe('/:article_id/comments', () => {
-        it('GET, status 200, getCommentsByArticleId()', () => {
-          const comments = [testData.comments[0], testData.comments[2]];
+        it('GET, status 200', () => {
           return request
             .get(`/api/articles/${testData.articles[0]._id}/comments`)
             .expect(200)
             .then(res => {
-              const sortedResult = res.body.article.comments.sort();
               expect(res.body.article).to.be.an('object');
-              expect(res.body.article.comments).to.eql(comments.sort());
+              expect(res.body.article.comments).to.eql([testData.comments[0]]);
             });
         });
-        it('POST, status 201, postNewCommentByArticleId()', () => {
+        it('POST, status 201', () => {
           const newCommentBody = {
             comment: 'new test comment',
             created_by: testData.users[1]._id
@@ -131,12 +157,20 @@ describe('Northcoders News API Tests\n', () => {
               expect(res.body.commentDoc.body).to.equal(newCommentBody.comment);
             });
         });
+        it('Bad Request 400', () => {
+          return request
+            .get(`/api/articles/123456789/comments`)
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.be.an('object');
+            });
+        });
       });
     });
 
     describe('/comments', () => {
       describe('/:comment_id', () => {
-        it('GET, status 200, getCommentById()', () => {
+        it('GET, status 200', () => {
           return request
             .get(`/api/comments/${testData.comments[1]._id}`)
             .expect(200)
@@ -145,7 +179,7 @@ describe('Northcoders News API Tests\n', () => {
               expect(res.body.comment.body).to.equal(testData.comments[1].body);
             });
         });
-        it('PUT, status 204, putCommentVoteUpOrDown() - increment', () => {
+        it('PUT, status 204, increment', () => {
           return request
             .put(`/api/comments/${testData.comments[0]._id}?vote=up`)
             .expect(204)
@@ -157,7 +191,7 @@ describe('Northcoders News API Tests\n', () => {
                 });
             });
         });
-        it('PUT, status 204, putCommentVoteUpOrDown() - decrement', () => {
+        it('PUT, status 204, decrement', () => {
           return request
             .put(`/api/comments/${testData.comments[0]._id}?vote=down`)
             .expect(204)
@@ -169,7 +203,7 @@ describe('Northcoders News API Tests\n', () => {
                 });
             });
         });
-        it('DELETE, status 200, deletCommentById()', () => {
+        it('DELETE, status 200', () => {
           return request
             .delete(`/api/comments/${testData.comments[0]._id}`)
             .expect(200)
@@ -177,12 +211,20 @@ describe('Northcoders News API Tests\n', () => {
               expect(res.body.msg).to.equal('Comment Deleted');
             });
         });
+        it('Bad Request 400', () => {
+          return request
+            .get(`/api/comments/123456789`)
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.be.an('object');
+            });
+        });
       });
     });
 
     describe('/users', () => {
       describe('/:user_name', () => {
-        it('GET, status 200, getUserByUserName()', () => {
+        it('GET, status 200', () => {
           return request
             .get(`/api/users/${testData.users[0].username}`)
             .expect(200)
