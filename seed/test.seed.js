@@ -81,7 +81,6 @@ function seedComments(model, data) {
 
 function seedTestDb(DB_URL) {
   const data = {};
-
   return seedTopics(Topics)
     .then(topicDocs => {
       data.topics = topicDocs.map(doc =>
