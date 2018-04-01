@@ -16,13 +16,15 @@ mongoose
   .connect(DB_URL, { useMongoClient: true })
   .then(() => {
     if (process.env.NODE_ENV !== 'test')
-      console.log(
-        `successfully connected to: ${config.DB[process.env.NODE_ENV]}`
-      );
+      console.log(`successfully connected to: ${DB_URL}`);
   })
   .catch(err => {
     console.log(`connection Error ${err}`);
   });
+
+app.use('/', (req, res) => {
+  res.status(200).sendFile(path.join(__dirname + '/views/welcome.html'));
+});
 
 app.use('/api', apiRouter);
 
