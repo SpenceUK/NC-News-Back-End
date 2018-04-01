@@ -16,7 +16,9 @@ mongoose
   .connect(DB_URL, { useMongoClient: true })
   .then(() => {
     if (process.env.NODE_ENV !== 'test')
-      console.log(`successfully connected to: ${DB_URL}`);
+      console.log(
+        `successfully connected to mongo: ${process.env.NODE_ENV} DB`
+      );
   })
   .catch(err => {
     console.log(`connection Error ${err}`);
