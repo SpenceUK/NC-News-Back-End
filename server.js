@@ -6,13 +6,14 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const config = require('./config');
 const { apiRouter } = require('./routes/api');
+const DB_URL = process.env.DB_URL || config.DB[process.env.NODE_ENV];
 
 app.use(bodyParser.json());
 if (process.env.NODE_ENV === 'dev') app.use(morgan('dev'));
 
 mongoose.Promise = Promise;
 mongoose
-  .connect(config.DB[process.env.NODE_ENV], { useMongoClient: true })
+  .connect(DB_URL, { useMongoClient: true })
   .then(() => {
     if (process.env.NODE_ENV !== 'test')
       console.log(
