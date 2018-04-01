@@ -8,7 +8,8 @@
     "start": "node listen.js",
     "dev": "nodemon listen.js",
     "seed:test": "node ./seed/test.seed.js",
-    "seed:dev": "node ./seed/seed.js"
+    "seed:dev": "node ./seed/seed.js",
+    "seed:prod": "NODE_ENV=production node ./seed/seed.js"
   },
   "author": "Chris Spence",
   "license": "ISC",
