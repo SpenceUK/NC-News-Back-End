@@ -98,7 +98,7 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
           commentPromises.push(
             new models.Comments({
               body: faker.fake(
-                'Who ever has written this is a {{random.word}}, I really {{hacker.verb}} with this article! I think they should {{hacker.verb}} {{random.word}}. Why do they think {{random.word}} is a good idea? what a total {{random.word}}!'
+                'Who ever has written this is a {{random.word}}, I really {{hacker.verb}} with this article! I think they should {{hacker.verb}} {{random.word}}. Why do they think {{random.word}} is a good idea? what a total {{random.word}}! I feel like a {{random.word}}.'
               ),
               belongs_to: articleIds[randomProp(articleIds)],
               created_at: new Date(

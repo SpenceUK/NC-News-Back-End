@@ -1,5 +1,4 @@
 if (!process.env.NODE_ENV) process.env.NODE_ENV = 'dev';
-
 const app = require('express')();
 const path = require('path');
 const mongoose = require('mongoose');
