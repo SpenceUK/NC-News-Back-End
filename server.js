@@ -24,7 +24,7 @@ mongoose
     console.log(`connection Error ${err}`);
   });
 
-app.use('/', (req, res) => {
+app.get('/', (req, res) => {
   res.status(200).sendFile(path.join(__dirname + '/views/welcome.html'));
 });
 
