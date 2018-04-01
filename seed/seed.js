@@ -4,6 +4,11 @@ const csv = require('csvtojson');
 const path = require('path');
 const config = require('../config');
 const faker = require('faker');
+const DB_URL =
+  process.env.NODE_ENV === 'production'
+    ? process.env.DB_URL
+    : require('./config').DB[process.env.NODE_ENV];
+
 mongoose.Promise = Promise;
 
 const articlePath = path.join(__dirname + '/data/articles.csv');
@@ -133,4 +138,4 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
     });
 }
 
-seedDatabase(config.DB.dev, articlePath, topicsPath, usersPath, models);
+seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models);
