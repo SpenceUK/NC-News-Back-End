@@ -21,11 +21,12 @@ function getCommentById(req, res, next) {
 function putCommentVoteUpOrDown(req, res, next) {
   const { vote } = req.query;
   const { comment_id } = req.params;
+  let query;
   if (vote === 'up') query = 1;
   else if (vote === 'down') query = -1;
   else throw new Error('Query Error');
   Comments.findOneAndUpdate({ _id: comment_id }, { $inc: { votes: query } })
-    .then(result => {
+    .then(() => {
       res.status(204).send();
     })
     .catch(err => {

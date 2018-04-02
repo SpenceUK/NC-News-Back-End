@@ -1,4 +1,3 @@
-const mongo = require('mongoose');
 const { Topics, Articles } = require('../models');
 
 function getAllTopics(req, res, next) {
@@ -21,6 +20,11 @@ function getArticlesByTopicId(req, res, next) {
     .catch(err => {
       if (err.message === 'CODE:1')
         return next({ code: 1, msg: 'Document(s) Not Found' });
+      if (err.name === 'CastError')
+        return next({
+          code: 1,
+          msg: 'Incorrect topic id'
+        });
       next(err);
     });
 }

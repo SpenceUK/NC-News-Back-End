@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 if (!process.env.NODE_ENV) process.env.NODE_ENV = 'dev';
 const app = require('express')();
 const path = require('path');
@@ -57,10 +58,11 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if ((err.code = 400)) return res.status(400).send({ msg: 'Bad Request' });
+  if (err.code === 400) return res.status(400).send({ msg: 'Bad Request' });
   next(err);
 });
 
+/* eslint-disable-next-line no-unused-vars */
 app.use((err, req, res, next) => {
   return res.status(500).send({ msg: 'Internal Server Error' });
 });

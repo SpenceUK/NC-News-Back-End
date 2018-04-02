@@ -1,5 +1,4 @@
 process.env.NODE_ENV = 'test';
-const config = require('../config');
 const app = require('../server');
 const request = require('supertest')(app);
 const { expect } = require('chai');
@@ -13,7 +12,7 @@ describe('Northcoders News API Tests\n', () => {
     return mongoose.connection
       .dropDatabase()
       .then(() => {
-        return seed(config.DB.test);
+        return seed();
       })
       .then(data => {
         testData = data[0];
@@ -27,7 +26,7 @@ describe('Northcoders News API Tests\n', () => {
         return mongoose.disconnect();
       })
       .catch(err => {
-        console.log(`Test database seeding ERROR: \n${err}`);
+        throw new Error(`Test database seeding ERROR: \n${err}`);
       });
   });
 
@@ -64,7 +63,7 @@ describe('Northcoders News API Tests\n', () => {
         });
         it('Bad Request 400', () => {
           return request
-            .get(`/api/topics/123456789/articles`)
+            .get('/api/topics/123456789/articles')
             .expect(400)
             .then(res => {
               expect(res.body).to.be.an('object');
@@ -97,7 +96,7 @@ describe('Northcoders News API Tests\n', () => {
         });
         it('Bad Request 400', () => {
           return request
-            .get(`/api/articles/123456789`)
+            .get('/api/articles/123456789')
             .expect(400)
             .then(res => {
               expect(res.body).to.be.an('object');
@@ -125,7 +124,7 @@ describe('Northcoders News API Tests\n', () => {
         });
         it('Bad Request 400', () => {
           return request
-            .get(`/api/articles/123456789?vote=up`)
+            .get('/api/articles/123456789?vote=up')
             .expect(400)
             .then(res => {
               expect(res.body).to.be.an('object');
@@ -159,7 +158,7 @@ describe('Northcoders News API Tests\n', () => {
         });
         it('Bad Request 400', () => {
           return request
-            .get(`/api/articles/123456789/comments`)
+            .get('/api/articles/123456789/comments')
             .expect(400)
             .then(res => {
               expect(res.body).to.be.an('object');
@@ -213,7 +212,7 @@ describe('Northcoders News API Tests\n', () => {
         });
         it('Bad Request 400', () => {
           return request
-            .get(`/api/comments/123456789`)
+            .get('/api/comments/123456789')
             .expect(400)
             .then(res => {
               expect(res.body).to.be.an('object');

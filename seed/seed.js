@@ -1,8 +1,8 @@
+/* eslint-disable no-console */
 const models = require('../models');
 const mongoose = require('mongoose');
 const csv = require('csvtojson');
 const path = require('path');
-const config = require('../config');
 const faker = require('faker');
 const DB_URL =
   process.env.NODE_ENV === 'production'
@@ -16,8 +16,8 @@ const topicsPath = path.join(__dirname + '/data/topics.csv');
 const usersPath = path.join(__dirname + '/data/users.csv');
 
 function parseCSVFile(pathToFile, arrayOfIdsObjects = []) {
-  const [topicIds, userIds, articleIds] = arrayOfIdsObjects;
-  return new Promise((res, rej) => {
+  const [topicIds, userIds] = arrayOfIdsObjects;
+  return new Promise(res => {
     const arrayOfJSONObjects = [];
     csv()
       .fromFile(pathToFile)
@@ -31,7 +31,6 @@ function parseCSVFile(pathToFile, arrayOfIdsObjects = []) {
       .on('done', err => {
         if (err) {
           throw new Error(`CSV PARSE ERROR:\n${err}`);
-          return mongoose.disconnect();
         }
         console.log(`📄 - ${path.basename(pathToFile)} successfully parsed.`);
         res(arrayOfJSONObjects);
@@ -98,7 +97,7 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
         `💾 - ${articleDocs.length} new documents saved in collection Articles.`
       );
       const commentPromises = [];
-      Object.keys(articleIds).forEach(article => {
+      Object.keys(articleIds).forEach(() => {
         for (let i = Math.random() * 15 + 6; i > 0; i--) {
           commentPromises.push(
             new models.Comments({

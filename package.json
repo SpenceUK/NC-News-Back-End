@@ -7,7 +7,7 @@
     "test": "mocha spec",
     "start": "node listen.js",
     "dev": "nodemon listen.js",
-    "seed:test": "node ./seed/test.seed.js",
+    "seed:test": "NODE_ENV=test node ./seed/test.seed.js",
     "seed:dev": "node ./seed/seed.js",
     "seed:prod":
       "NODE_ENV=production PORT=3000 DB_URL=<db_url> node seed/seed.js"

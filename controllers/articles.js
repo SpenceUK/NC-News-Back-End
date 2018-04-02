@@ -38,7 +38,7 @@ function getArticleById(req, res, next) {
 
 function getCommentsByArticleId(req, res, next) {
   const { article_id } = req.params;
-  return new Promise((res, rej) => {
+  return new Promise(res => {
     let data = [];
     Articles.aggregate()
       .match({ _id: mongoose.Types.ObjectId(article_id) })
@@ -93,11 +93,12 @@ function postNewCommentByArticleId(req, res, next) {
 function putArticleVoteUpOrDown(req, res, next) {
   const { vote } = req.query;
   const { article_id } = req.params;
+  let query;
   if (vote === 'up') query = 1;
   else if (vote === 'down') query = -1;
   else throw new Error('Query Error');
   Articles.findOneAndUpdate({ _id: article_id }, { $inc: { votes: query } })
-    .then(result => {
+    .then(() => {
       res.status(204).send();
     })
     .catch(err => {
