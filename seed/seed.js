@@ -7,7 +7,7 @@ const faker = require('faker');
 const DB_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.DB_URL
-    : require('./config').DB[process.env.NODE_ENV];
+    : require('../config').DB[process.env.NODE_ENV];
 
 mongoose.Promise = Promise;
 
@@ -25,6 +25,7 @@ function parseCSVFile(pathToFile, arrayOfIdsObjects = []) {
         if (path.basename(pathToFile) === 'articles.csv') {
           jsonObject.belongs_to = topicIds[jsonObject.topic];
           jsonObject.created_by = userIds[randomProp(userIds)];
+          jsonObject.votes = (Math.random() * 50) << 0;
         }
         arrayOfJSONObjects.push(jsonObject);
       })
@@ -70,7 +71,9 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
   mongoose
     .connect(DB_URL, { useMongoClient: true })
     .then(() => {
-      console.log(`☎️ - connected to: ${DB_URL}`);
+      console.log(
+        `☎️ successfully connected to mongo: ${process.env.NODE_ENV} DB`
+      );
       return mongoose.connection.db.dropDatabase();
     })
     .then(() => {
@@ -129,7 +132,7 @@ function seedDatabase(DB_URL, articlePath, topicsPath, usersPath, models) {
       return mongoose.disconnect();
     })
     .then(() => {
-      console.log(`☎️ - Disconnected from: ${DB_URL}.`);
+      console.log(`☎️ - Disconnected from mongo: ${process.env.NODE_ENV} DB`);
     })
     .catch(err => {
       console.log(`DATABASE SEEDING ERROR\n${err}`);

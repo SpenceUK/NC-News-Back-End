@@ -8,7 +8,7 @@
     "start": "node listen.js",
     "dev": "nodemon listen.js",
     "seed:test": "NODE_ENV=test node ./seed/test.seed.js",
-    "seed:dev": "node ./seed/seed.js",
+    "seed:dev": "NODE_ENV='dev' node ./seed/seed.js",
     "seed:prod":
       "NODE_ENV=production PORT=3000 DB_URL=<db_url> node seed/seed.js"
   },
@@ -17,6 +17,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
+    "cors": "^2.8.4",
     "express": "^4.14.0",
     "mongoose": "^4.7.0"
   },

@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 function getCommentById(req, res, next) {
   const { comment_id } = req.params;
   Comments.findOne({ _id: mongoose.Types.ObjectId(comment_id) })
+    .populate('belongs_to')
+    .populate('created_by')
+    .exec()
     .then(comment => {
       if (!comment) {
         const error = new Error('Comment does not Exist');

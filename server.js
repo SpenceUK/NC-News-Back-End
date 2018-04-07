@@ -4,12 +4,14 @@ const app = require('express')();
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const morgan = require('morgan');
 const config = require('./config');
 const { apiRouter } = require('./routes/api');
 const DB_URL = process.env.DB_URL || config.DB[process.env.NODE_ENV];
 
 app.use(bodyParser.json());
+app.use(cors());
 if (process.env.NODE_ENV === 'dev') app.use(morgan('dev'));
 
 mongoose.Promise = Promise;

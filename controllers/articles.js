@@ -1,9 +1,10 @@
 const { Articles, Comments, Users } = require('../models');
-const mongoose = require('mongoose');
 
 function getAllArticles(req, res, next) {
   Articles.find()
-    .lean()
+    .populate('belongs_to')
+    .populate('created_by')
+    .exec()
     .then(articles => {
       res.status(200).send({ articles });
     })
@@ -13,6 +14,9 @@ function getAllArticles(req, res, next) {
 function getArticleById(req, res, next) {
   const { article_id } = req.params;
   Articles.findOne({ _id: article_id })
+    .populate('belongs_to')
+    .populate('created_by')
+    .exec()
     .then(article => {
       if (!article) {
         const error = new Error('Article does not Exist');
@@ -38,24 +42,14 @@ function getArticleById(req, res, next) {
 
 function getCommentsByArticleId(req, res, next) {
   const { article_id } = req.params;
-  return new Promise(res => {
-    let data = [];
-    Articles.aggregate()
-      .match({ _id: mongoose.Types.ObjectId(article_id) })
-      .lookup({
-        from: 'comments',
-        localField: '_id',
-        foreignField: 'belongs_to',
-        as: 'comments'
-      })
-      .sort({ body: 1 })
-      .cursor({})
-      .exec()
-      .on('data', doc => data.push(doc))
-      .on('end', () => {
-        res(data[0]);
-      });
-  })
+  Articles.findOne({ _id: article_id })
+    .populate('belongs_to')
+    .populate('created_by')
+    .populate({
+      path: 'Comments',
+      populate: { path: 'created_by' }
+    })
+    .exec()
     .then(article => {
       res.status(200).send({ article });
     })
