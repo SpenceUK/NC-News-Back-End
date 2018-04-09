@@ -21,4 +21,22 @@ function getUserByUserName(req, res, next) {
     });
 }
 
-module.exports = { getUserByUserName };
+function getPopularUsers(req, res, next) {
+  Users.find()
+    .populate('Articles')
+    .populate('Comments')
+    .exec()
+    .then(users => {
+      res.status(200).send({ users });
+    })
+    .catch(err => {
+      if (err.name === 'Find Error')
+        return next({
+          code: 1,
+          msg: err.message
+        });
+      next(err);
+    });
+}
+
+module.exports = { getUserByUserName, getPopularUsers };
